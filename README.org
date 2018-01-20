@@ -1,8 +1,33 @@
 * PyDev Client
+This project is still in beta, so it may require some extra actions to get it running. Your mileage may vary.
 
-PyDev ([[https://github.com/fabioz/PyDev.Debugger ]]) is the Python debugger used in PyCharm and Eclipse Python IDE plugin. It supports debugging multi-threaded applications such as Django or CherryPy -based projects.
+PyDev ([[https://github.com/fabioz/PyDev.Debugger ]]) is the Python debugger used in PyCharm and Eclipse's PyDev-plugin. It supports debugging multi-threaded applications such as Django or CherryPy -based projects.
 
-This repository contains a Python command line client for PyDev, and a realgud-bindings for using it with Emacs.
+This repository contains a command-line client for PyDev, and realgud-bindings for using it inside Emacs.
+** Known limitations:
+Implemented commands:
+| command   | short | description                                                                           |
+|-----------+-------+---------------------------------------------------------------------------------------|
+| start     |       | start the debugger                                                                    |
+| step      | s     | step into                                                                             |
+| next      | n     | step over                                                                             |
+| return    | r     | step out                                                                              |
+| break     | b     | add breakpoint                                                                        |
+| delete    |       | remove breakopint                                                                     |
+| continue  | c     | continue execution after break                                                        |
+| eval      | e     | evaluate an expression                                                                |
+| exit/quit | ^D    | exit the debugger (currently does not kill the debugger, but continues its execution) |
+| list      | l     | list file contents around current position                                            |
+
+Features to be implemented:
+- Enabling/disabling breakpoints
+- Moving up/down frames
+- restarting the debugger
+- breakpoint conditional expressions
+- Better input handling, arrow keys not working since we are using readline for now. Reason for using readline instead of raw_input is that readline can be used with select.
+- tests
+- better handling for multiple threads, currently the client selects one thread as an active one. A thread that stops at a breakpoint is always selected as active
+- supporting multiple simultaneous sessions inside emacs, requires some way to get a free port number for the server and the client to become aware of it.  
 
 ** Python client
 *** Installation:
@@ -15,11 +40,11 @@ This will install the client, and PyDev debugger daemon as a dependency.
 *** Usage:
 Start the daemon:
 #+BEGIN_SRC sh
-pydevd --port <choose a port number> --server --file <filename> [args...]
+pydevd --port port --server --file filename [arguments ...]
 #+END_SRC
 or
 #+BEGIN_SRC sh
-pydevd --port <choose a port number> --server --module --file <module name> [args...]
+pydevd --port port --server --module --file filename [arguments ...]
 #+END_SRC
 
 Start the client:
@@ -27,8 +52,13 @@ Start the client:
 pydevc --server 127.0.0.1 --port <server's port number>
 #+END_SRC
 The client has connected to the remote debugger when you see prompt (pydev).
-** Realgud-extension
+** Realgud extension
 *** Installation:
+Add following to your init file (requires use-package to be installed):
+#+BEGIN_SRC elisp
+  (use-package realgud-pydev
+    :load-path "/path/to/pydev-client")
+#+END_SRC
 *** Usage:
 #+BEGIN_SRC
 M-x realgud:pydev-current-file
@@ -37,6 +67,8 @@ or
 #+BEGIN_SRC
 M-x realgud:pydev-module
 #+END_SRC
+
+Virtual environments work as expected at least with pyvenv, if the python modules have been installed to the specific virtual environment.
 
 ** Compiling PyDev debugger
 To get much more performance from the debugger server, you can compile it with Cython:
