@@ -1,6 +1,6 @@
 * PyDev Client
 
-PyDev ([https://github.com/fabioz/PyDev.Debugger]) is the Python debugger used in PyCharm and Eclipse Python IDE plugin. It supports debugging multi-threaded applications such as Django or CherryPy -based projects.
+PyDev ([[https://github.com/fabioz/PyDev.Debugger ]]) is the Python debugger used in PyCharm and Eclipse Python IDE plugin. It supports debugging multi-threaded applications such as Django or CherryPy -based projects.
 
 This repository contains a Python command line client for PyDev, and a realgud-bindings for using it with Emacs.
 
@@ -26,6 +26,30 @@ Start the client:
 #+BEGIN_SRC sh
 pydevc --server 127.0.0.1 --port <server's port number>
 #+END_SRC
+The client has connected to the remote debugger when you see prompt (pydev).
 ** Realgud-extension
 *** Installation:
 *** Usage:
+#+BEGIN_SRC
+M-x realgud:pydev-current-file
+#+END_SRC
+or
+#+BEGIN_SRC
+M-x realgud:pydev-module
+#+END_SRC
+
+** Compiling PyDev debugger
+To get much more performance from the debugger server, you can compile it with Cython:
+   1. Clone the PyDev repository from [[https://github.com/fabioz/PyDev.Debugger]]
+   2. Ensure you have cython installed
+      #+BEGIN_SRC sh
+      pip install cython
+      #+END_SRC
+   3. Compile the library
+      #+BEGIN_SRC sh
+      python setup_cython.py build_ext --inplace
+      #+END_SRC
+   4. Install the library
+      #+BEGIN_SRC sh
+      pip install .
+      #+END_SRC
