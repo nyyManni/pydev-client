@@ -16,6 +16,9 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;;
 (require 'load-relative)
+
+(require 'realgud)
+
 (require-relative-list '("init") "realgud:pydev-")
 
 (declare-function realgud:expand-file-name-if-exists 'realgud-core)

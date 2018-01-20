@@ -50,8 +50,6 @@ realgud-loc-pat struct")
 ;; Regular expression that describes a pydev prompt.
 ;; Note: the prompt in nested debugging
 ;; For example:
-;; (trepan3)
-;; ((pydev))
 (setf (gethash "prompt" realgud:pydev-pat-hash)
       (make-realgud-loc-pat
        :regexp   "^(pydevc) "

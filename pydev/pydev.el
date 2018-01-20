@@ -11,7 +11,7 @@
 ;; (require 'load-relative)
 ;; (require-relative-list '("../../common/helper") "realgud-")
 ;; (require-relative-list '("../../common/run")    "realgud:")
-;; (require-relative-list '("core" "track-mode") "realgud:pydev-")
+(require-relative-list '("core" "track-mode") "realgud:pydev-")
 
 ;; This is needed, or at least the docstring part of it is needed to
 ;; get the customization menu to work in Emacs 24.
@@ -23,9 +23,9 @@
 
 (declare-function pydev-query-cmdline  'realgud:pydev-core)
 (declare-function pydev-parse-cmd-args 'realgud:pydev-core)
-(declare-function realgud:run-debugger    'realgud:run)
-(declare-function realgud:run-process     'realgud:core)
-(declare-function realgud:flatten         'realgud-utils)
+(declare-function realgud:run-debugger 'realgud:run)
+(declare-function realgud:run-process  'realgud:core)
+(declare-function realgud:flatten      'realgud-utils)
 
 ;; -------------------------------------------------------------------
 ;; User-definable variables
