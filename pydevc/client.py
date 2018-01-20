@@ -57,9 +57,9 @@ class PyDevClient(threading.Thread):
         super().__init__(daemon=True)
         self.host = host
         self.port = port
-        self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.stopped = False
         self.msg_id = 1
+        self.conn = None
 
         self.reply_lock = threading.Lock()
         self.reply_queue = {}
@@ -80,6 +80,7 @@ class PyDevClient(threading.Thread):
         t0 = time.time()
         while time.time() - t0 < timeout:
             try:
+                self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.conn.connect((self.host, self.port))
                 break
             except socket.error:
