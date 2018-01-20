@@ -281,8 +281,8 @@ class DebuggerConsole(cmd.Cmd):
 
             id:   The id of the breakpoint to delete.
         """
-
-    do_c = do_delete
+        for breakpoint_id in ids:
+            self.session.remove_breakpoint(breakpoint_id)
 
     @split_args(str)
     def do_step(self, thread=None):
@@ -411,6 +411,8 @@ class DebuggerConsole(cmd.Cmd):
         """
         value = self.session.evaluate(expression)
         self.stdout.write(value + '\n')
+
+    do_e = do_eval
 
     @split_args(str)
     def do_help(self, command=None):  # pylint: disable=locally-disabled, arguments-differ
