@@ -70,6 +70,8 @@ M-x realgud:pydev-module
 
 Virtual environments work as expected at least with pyvenv, if the python modules have been installed to the specific virtual environment.
 
+The pydevd-server will be opened in a separate process, and it's output will be shown in a separate emacs buffer. This makes it easier to use the command-line interface when the output of the debugged program does not mess up the interface.
+
 ** Compiling PyDev debugger
 To get much more performance from the debugger server, you can compile it with Cython:
    1. Clone the PyDev repository from [[https://github.com/fabioz/PyDev.Debugger]]
