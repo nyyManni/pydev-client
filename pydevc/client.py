@@ -10,6 +10,7 @@ import functools
 import html
 import re
 import enum
+import signal
 
 from _pydevd_bundle.pydevd_comm import (
     CMD_RUN,
@@ -60,6 +61,7 @@ class PyDevClient(threading.Thread):
         self.stopped = False
         self.msg_id = 1
         self.conn = None
+        self.pid = None
 
         self.reply_lock = threading.Lock()
         self.reply_queue = {}
@@ -305,12 +307,28 @@ class PyDevClient(threading.Thread):
             self.add_breakpoint(filename=filename,
                                 line_number=line_number,
                                 _temporary=True)
+
+        msg_id = self.__send(CMD_LIST_THREADS)
+        threads, = self.__wait_for_reply(msg_id)
+
+        # Figure out the PID of the project
+        for thread in ET.fromstring(threads):
+            thread_id = thread.attrib['id']
+            self.pid = int(thread_id.split('_')[1])
+            break
+
         self.__send(CMD_RUN)
 
     def kill_debugger(self):
-        """Kill the debugger. """
-        # TODO: This seems to not be working.
-        self.__send(CMD_THREAD_KILL, '*')
+        """Kill the debugger"""
+
+        # CMD_EXIT and CMD_THREAD_KILL * seem to not be working with the current
+        # version of PyDev. However, we can get the PID of the process fromt the
+        # thread id of the MainThread, and thus can send a SIGTERM to it.
+        if self.pid is None:
+            raise RuntimeError('Debugger not yet running')
+
+        os.kill(self.pid, signal.SIGTERM)
 
     def thread_info(self):
         """Get information on the threads of the debugged process. """
