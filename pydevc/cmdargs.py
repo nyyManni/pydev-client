@@ -47,6 +47,20 @@ def parse_options(argv):
         action='store_true',
         help='if true, the script will suspend at first line of the file'
     )
+    parser.add_argument(
+        '--print-locals',
+        action='store',
+        choices=['off', 'table', 'lisp'],
+        default='off',
+        help='if true, the script will suspend at first line of the file'
+    )
+
+    parser.add_argument(
+        '--debug',
+        action='store_true',
+        default=False,
+        help='turn on debug logging'
+    )
 
     parser.add_argument(
         '--sync',

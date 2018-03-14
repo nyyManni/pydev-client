@@ -131,6 +131,7 @@ If MODULEP is t, load a python module named FILENAME instead of a file."
   (realgud:pydev-start-daemon filename nil args)
   (realgud:pydev (concat "pydevc --server 127.0.0.1 --port "
                          (number-to-string realgud:pydev-port)
+                         " --print-locals=lisp"
                          " --autostart --break-at-start --file "
                          filename)))
 
@@ -167,6 +168,7 @@ With prefix-argument WITH-ARGS, prompt for additional arguments to the script."
   (realgud:pydev-start-daemon name t args)
   (realgud:pydev (concat "pydevc --server 127.0.0.1 --port "
                          (number-to-string realgud:pydev-port)
+                         " --print-locals=lisp"
                          " --autostart --break-at-start --file "
                          (realgud:pydev--module-entry-point name))))
 

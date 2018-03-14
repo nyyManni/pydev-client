@@ -13,18 +13,19 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "Implements client-side communication protocol for PyDev debugger."
 
-import time
-import os
-import socket
-import threading
-import urllib.parse
-import logging
-import xml.etree.ElementTree as ET
+import enum
 import functools
 import html
+import logging
+import os
 import re
-import enum
 import signal
+import socket
+import threading
+import time
+import urllib.parse
+import xml.etree.ElementTree as ET
+import queue
 
 from _pydevd_bundle.pydevd_comm import (
     CMD_RUN,
@@ -40,7 +41,8 @@ from _pydevd_bundle.pydevd_comm import (
     CMD_STEP_RETURN,
     CMD_SMART_STEP_INTO,
     CMD_LIST_THREADS,
-    CMD_EVALUATE_EXPRESSION
+    CMD_EVALUATE_EXPRESSION,
+    CMD_GET_FRAME
 )
 
 
@@ -90,6 +92,8 @@ class PyDevClient(threading.Thread):
         self._active_frames = []
 
         self.write_lock = threading.Lock()
+
+        self.queue = queue.Queue()
 
     def connect(self, timeout=5):
         """Connect to the remote debugger."""
@@ -155,7 +159,7 @@ class PyDevClient(threading.Thread):
                             'state': State.RUNNING,
                             'file': None,
                             'line': None,
-                            'funciotn': None
+                            'function': None
                         }
 
                 self.__run_callback(PyDevClient.EVENT_THREAD_CREATE,
@@ -244,6 +248,7 @@ class PyDevClient(threading.Thread):
     def run(self):
         self.stopped = False
         buf = ''
+
         while not self.stopped:
             d = self.conn.recv(1024).decode('utf-8')
             if not d:
@@ -256,7 +261,9 @@ class PyDevClient(threading.Thread):
             # The messages are split by a newline.
             while '\n' in d:
                 msg, d = d.split('\n', maxsplit=1)
-                self.__process(msg)
+                # self.queue.put(msg)
+
+                threading.Thread(target=self.__process, args=[msg], daemon=True).start()
             buf = d
 
     def init(self, version, os_type=('WINDOWS' if os.name == 'nt' else 'UNIX'),
@@ -454,6 +461,25 @@ class PyDevClient(threading.Thread):
 
         result = ET.fromstring(reply[0])
         return unquote(unquote(result[0].attrib['value']))
+
+    def get_locals(self):
+        """Get values of local variables """
+        if not self._active_frames:
+            raise RuntimeError('No active frame')
+
+        msg_id = self.__send(CMD_GET_FRAME, self._active_thread,
+                             self._active_frames[0], None)
+        reply = self.__wait_for_reply(msg_id, timeout=10)
+        result = ET.fromstring(unquote(reply[0]))
+
+        return {
+            unquote(var.attrib['name']): {
+                'type': unquote(var.attrib['type']),
+                'value': unquote(var.attrib['value']),
+                'qualifier': unquote(var.attrib['qualifier']),
+                'container': unquote(var.attrib.get('isContainer', '')) == 'True',
+            } for var in result
+        }
 
 
 def unquote(string):

@@ -23,6 +23,8 @@ from .repl import run_repl
 def main():
     """Set up logging and start the repl."""
 
+    options = parse_options(sys.argv[1:])
+
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
 
@@ -30,10 +32,14 @@ def main():
 
     console = logging.StreamHandler()
     console.setFormatter(formatter)
-    console.setLevel(logging.INFO)
+
+    if options.debug:
+        console.setLevel(logging.DEBUG)
+    else:
+        console.setLevel(logging.INFO)
+
     root.addHandler(console)
 
-    options = parse_options(sys.argv[1:])
     run_repl(options)
 
 

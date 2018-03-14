@@ -101,7 +101,8 @@ class DebuggerConsole(cmd.Cmd):
     """REPL console for PyDev debugger."""
 
     def __init__(self, host, port, stdin=sys.stdin, stdout=sys.stdout,
-                 autostart=False, filename=None, break_at_start=False):
+                 autostart=False, filename=None, break_at_start=False,
+                 print_locals='off'):
         super().__init__(stdin=stdin, stdout=stdout)
         self.session = PyDevClient(host, port)
 
@@ -120,6 +121,8 @@ class DebuggerConsole(cmd.Cmd):
         self.filename = filename
         self.break_at_start = break_at_start
         self.autostart = autostart
+
+        self.print_locals = print_locals
 
         self.opt_list_context = 7
 
@@ -144,6 +147,7 @@ class DebuggerConsole(cmd.Cmd):
             while not self._quit:
 
                 # Non-blocking user input with select
+                # NOTE: This does not support fancy input like with readline.
                 read, _write, _error = select.select([sys.stdin], [], [], 0.1)
 
                 if read:
@@ -181,6 +185,19 @@ class DebuggerConsole(cmd.Cmd):
         """A thread stopped at a breakpoint.
         """
         msg = '({}:{}): {}\n'.format(filename, line_no, function)
+
+        if self.print_locals == 'lisp':
+            # Print the dictionary in lisp for so it can be easily parsed by
+            # Emacs.
+            l = ''
+            for name, props in self.session.get_locals().items():
+                l += '(%s %s "%s")' % (name, props['type'],
+                                       props['value'].replace('"', '\\"'))
+
+            msg += '$$({})$$\n'.format(l)
+
+        elif self.print_locals == 'table':
+            pass
 
         # Asynchronous operation, print a new prompt after the message.
         with self._prompt_lock:
@@ -428,6 +445,19 @@ class DebuggerConsole(cmd.Cmd):
 
     do_e = do_eval
 
+    @split_args()
+    def do_locals(self):
+        """Get values of local variables.
+
+        Local command evaluates locals() in current context and returns the
+        result.
+
+        Usage:
+            locals
+        """
+        for name, props in self.session.get_locals().items():
+            self.stdout.write('{}:\t{}\n'.format(name, props['value']))
+
     @split_args(str)
     def do_help(self, command=None):  # pylint: disable=locally-disabled, arguments-differ
         """Print list of commands.
@@ -556,5 +586,6 @@ def run_repl(options):
     c = DebuggerConsole(host=options.server, port=options.port,
                         autostart=options.autostart,
                         filename=options.file,
-                        break_at_start=options.break_at_start)
+                        break_at_start=options.break_at_start,
+                        print_locals=options.print_locals)
     c.cmdloop()
