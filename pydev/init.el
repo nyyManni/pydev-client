@@ -55,6 +55,7 @@ realgud-loc-pat struct")
        :regexp   "^(pydevc) "
        ))
 
+
 ;; realgud-loc-pat that describes a pydev backtrace line.
 ;; For example:
 ;; ->0 get_distribution(dist='trepan==0.3.9')

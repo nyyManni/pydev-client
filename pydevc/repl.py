@@ -191,8 +191,7 @@ class DebuggerConsole(cmd.Cmd):
             # Emacs.
             l = ''
             for name, props in self.session.get_locals().items():
-                l += '(%s %s "%s")' % (name, props['type'],
-                                       props['value'].replace('"', '\\"'))
+                l += '(%s "%s")' % (name, props['value'].replace('"', '\\"')[:80])
 
             msg += '$$({})$$\n'.format(l)
 
@@ -209,7 +208,6 @@ class DebuggerConsole(cmd.Cmd):
     def on_exit(self):
         """The server has finished execution, the client is free to exit.
         """
-        # The callback is called from another thread, sys.exit doesn't work here
         self._quit = True
 
     def on_breakpoint_create(self, breakpoint):
@@ -288,6 +286,7 @@ class DebuggerConsole(cmd.Cmd):
 
             id:   The id of the breakpoint to enable.
         """
+        raise NotImplementedError('Command enable not implemented')
 
     do_e = do_enable
 
@@ -300,6 +299,7 @@ class DebuggerConsole(cmd.Cmd):
 
             id:   The id of the breakpoint to disable.
         """
+        raise NotImplementedError('Command disable not implemented')
 
     do_d = do_disable
 
@@ -392,6 +392,7 @@ class DebuggerConsole(cmd.Cmd):
 
         The debugger has to be in a stopped state to execute this command.
         """
+        raise NotImplementedError('Command jump not implemented')
 
     do_j = do_jump
 
@@ -406,6 +407,7 @@ class DebuggerConsole(cmd.Cmd):
 
         The debugger has to be in a stopped state to go up a frame.
         """
+        raise NotImplementedError('Command up not implemented')
 
     @split_args()
     def do_down(self):
@@ -419,6 +421,7 @@ class DebuggerConsole(cmd.Cmd):
 
         The debugger has to be in a stopped state to go up a frame.
         """
+        raise NotImplementedError('Command down not implemented')
 
     @split_args(str)
     def do_exec(self, expression):
@@ -430,6 +433,7 @@ class DebuggerConsole(cmd.Cmd):
         Usage:
             exec <expression>
         """
+        raise NotImplementedError('Command exec not implemented')
 
     def do_eval(self, expression):
         """Evaluate expression in debuggee's context.

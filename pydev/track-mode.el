@@ -75,6 +75,35 @@ disables it otherwise.
       ))
 )
 
+
+(defun realgud-track-locals (text cmdmark &rest args)
+  "Track local variables."
+  (condition-case nil
+      (when (realgud-cmdbuf?)
+        (let ((locals-re "$$\\((\\(?:.*
+\\)*.*)\\)$\\$"))
+          (when(string-match locals-re text)
+            (let ((locals (car (read-from-string (match-string 1 text)))))
+
+              (with-current-buffer (get-buffer-create "*realgud-locals*")
+                (erase-buffer)
+                (let ((len (1+ (apply #'max (mapcar
+                                             (lambda (l)
+                                               (length (symbol-name (car l))))
+                                             locals)))))
+                  (mapc
+                   (lambda (l)
+                     (insert (format (concat "%-" (number-to-string len) "s%s\n")
+                                     (propertize (symbol-name (car l))
+                                                 'face 'font-lock-type-face)
+                                     (replace-regexp-in-string "
+" "\\\\n" (cadr l)))))
+
+                   locals)))))))
+    (error nil)))
+
+(advice-add 'realgud-track-loc :after 'realgud-track-locals)
+
 (define-key pydev-short-key-mode-map "T" 'realgud:cmd-backtrace)
 
 (provide-me "realgud:pydev-")
